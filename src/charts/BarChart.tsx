@@ -13,9 +13,10 @@ interface BarChartProps {
   goal?: number
   unit?: string
   height?: number
+  onBarClick?: (index: number) => void
 }
 
-export default function BarChart({ data, goal, unit = '', height = 200 }: BarChartProps) {
+export default function BarChart({ data, goal, unit = '', height = 200, onBarClick }: BarChartProps) {
   const [tooltip, setTooltip] = useState<{ idx: number; x: number; y: number } | null>(null)
 
   const maxY = useMemo(() => {
@@ -111,6 +112,7 @@ export default function BarChart({ data, goal, unit = '', height = 200 }: BarCha
                 fill={fill}
                 rx="0.8"
                 style={{ cursor: 'pointer' }}
+                onClick={() => onBarClick?.(i)}
                 onMouseEnter={(e) => {
                   const svg = e.currentTarget.ownerSVGElement!
                   const rect = svg.getBoundingClientRect()
