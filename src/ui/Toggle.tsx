@@ -31,7 +31,7 @@ export default function Toggle<T extends string>({ value, onChange, options }: T
                 : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
               }
             `}
-            style={active ? { background: 'var(--color-accent-soft)' } : {}}
+            style={active ? { background: '#ffffff', color: '#0a0b0e' } : {}}
           >
             {opt.label}
           </button>
