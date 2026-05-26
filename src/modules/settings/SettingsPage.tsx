@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Gear } from '@phosphor-icons/react'
 import ScreenHeader from '../../ui/ScreenHeader'
 import SegmentedControl from '../../ui/SegmentedControl'
 import Card from '../../ui/Card'
@@ -230,7 +231,10 @@ export default function SettingsPage() {
 
   return (
     <>
-      <ScreenHeader title="Settings" />
+      <ScreenHeader
+        title="Settings"
+        icon={<Gear size={22} weight="light" className="text-accent" aria-hidden="true" />}
+      />
 
       <div className="mb-6">
         <SegmentedControl

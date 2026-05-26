@@ -1,21 +1,36 @@
 import { useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import IconButton from '../ui/IconButton'
-import { List, X } from '@phosphor-icons/react'
+import {
+  List,
+  X,
+  SquaresFour,
+  Moon,
+  CheckSquare,
+  NotePencil,
+  Books,
+  Diamond,
+  Barbell,
+  ArrowUp,
+  ForkKnife,
+  CookingPot,
+  CalendarCheck,
+  Gear,
+} from '@phosphor-icons/react'
 
 const navItems = [
-  { label: 'Dashboard', path: '/' },
-  { label: 'Sleep', path: '/sleep' },
-  { label: 'To-do', path: '/todo' },
-  { label: 'Journal', path: '/journal' },
-  { label: 'Library', path: '/library' },
-  { label: 'Finance', path: '/finance' },
-  { label: 'Body', path: '/body' },
-  { label: 'Food', path: '/food' },
-  { label: 'Meal Prep', path: '/mealprep' },
-  { label: 'Workouts', path: '/workouts' },
-  { label: 'Weekly', path: '/weekly' },
-  { label: 'Settings', path: '/settings' },
+  { label: 'Dashboard',  path: '/',                    icon: <SquaresFour  size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Sleep',      path: '/sleep',               icon: <Moon         size={18} weight="light" aria-hidden="true" /> },
+  { label: 'To-do',      path: '/todo',                icon: <CheckSquare  size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Journal',    path: '/journal',             icon: <NotePencil   size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Library',    path: '/journal?tab=library', icon: <Books        size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Finance',    path: '/finance',             icon: <Diamond      size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Workouts',   path: '/workouts',            icon: <Barbell      size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Body',       path: '/body',                icon: <ArrowUp      size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Food',       path: '/food',                icon: <ForkKnife    size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Meal Prep',  path: '/mealprep',            icon: <CookingPot   size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Weekly',     path: '/weekly',              icon: <CalendarCheck size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Settings',   path: '/settings',            icon: <Gear         size={18} weight="light" aria-hidden="true" /> },
 ]
 
 function HamburgerIcon() {
@@ -27,8 +42,13 @@ function CloseIcon() {
 }
 
 function getPageTitle(path: string): string {
+  // For /journal with tab=library, show "Library"
+  const url = new URL(path, 'http://x')
+  const tab = url.searchParams.get('tab')
+  if (url.pathname === '/journal' && tab === 'library') return 'Library'
   const item = navItems.find((n) => {
     if (n.path === '/') return path === '/'
+    if (n.path.includes('?')) return false
     return path.startsWith(n.path)
   })
   return item?.label ?? 'matteOS'
@@ -41,7 +61,20 @@ interface MobileNavProps {
 export default function MobileNav({ right }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const location = useLocation()
-  const title = getPageTitle(location.pathname)
+  const tabParam = new URLSearchParams(location.search).get('tab')
+
+  const title = getPageTitle(location.pathname + location.search)
+
+  function isItemActive(path: string): boolean {
+    if (path === '/journal') {
+      return location.pathname === '/journal' && tabParam !== 'library'
+    }
+    if (path === '/journal?tab=library') {
+      return location.pathname === '/journal' && tabParam === 'library'
+    }
+    if (path === '/') return location.pathname === '/'
+    return location.pathname.startsWith(path)
+  }
 
   return (
     <>
@@ -86,28 +119,38 @@ export default function MobileNav({ right }: MobileNavProps) {
 
         {/* Nav links */}
         <div className="flex-1 overflow-y-auto py-2">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center h-10 px-4 text-sm transition-colors duration-[120ms] ease-out ${
-                  isActive
-                    ? 'text-text-primary font-medium'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
-                }`
-              }
-              style={({ isActive }) =>
-                isActive
-                  ? { background: 'var(--color-accent-soft)', borderLeft: '2px solid var(--color-accent)' }
-                  : {}
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const active = isItemActive(item.path)
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={false}
+                onClick={() => setOpen(false)}
+                className={() =>
+                  `flex items-center gap-[10px] h-11 px-4 transition-colors duration-[120ms] ease-out ${
+                    active
+                      ? 'text-text-primary font-medium'
+                      : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
+                  }`
+                }
+                style={() =>
+                  active
+                    ? { background: 'var(--color-accent-soft)', borderLeft: '2px solid var(--color-accent)' }
+                    : {}
+                }
+                aria-current={active ? 'page' : undefined}
+              >
+                <span
+                  className="flex-shrink-0"
+                  style={{ color: active ? 'var(--color-accent)' : 'var(--color-text-muted)' }}
+                >
+                  {item.icon}
+                </span>
+                <span style={{ fontSize: '15px' }}>{item.label}</span>
+              </NavLink>
+            )
+          })}
         </div>
       </nav>
     </>

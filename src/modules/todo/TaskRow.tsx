@@ -100,6 +100,8 @@ export interface TaskRowProps {
   overdueDate?: string
   /** Hide the drag grip handle for non-draggable rows (e.g. overdue section) */
   showGrip?: boolean
+  /** Disable all interactions — checkbox and click do nothing (used in Dashboard preview) */
+  readOnly?: boolean
   // Drag & drop
   isDragging?: boolean
   onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void
@@ -120,6 +122,7 @@ export default function TaskRow({
   togglePending,
   overdueDate,
   showGrip = true,
+  readOnly = false,
   isDragging,
   onDragStart,
   onDragOver,
@@ -131,6 +134,7 @@ export default function TaskRow({
   const { task, completed } = instance
 
   function handleToggle(e: React.MouseEvent) {
+    if (readOnly) return
     e.stopPropagation()
     onToggle(instance)
   }
@@ -158,13 +162,13 @@ export default function TaskRow({
       onDragEnd={showGrip ? onDragEnd : undefined}
       className={`
         flex items-center gap-3 px-4 py-3
-        cursor-pointer hover:bg-bg-hover
+        ${readOnly ? 'cursor-default' : 'cursor-pointer hover:bg-bg-hover'}
         transition-colors duration-[120ms] ease-out
         select-none
         ${isDragging ? 'opacity-40' : ''}
         ${completed ? 'opacity-60' : ''}
       `}
-      onClick={() => onClick(instance)}
+      onClick={readOnly ? undefined : () => onClick(instance)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

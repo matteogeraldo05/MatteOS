@@ -4,7 +4,7 @@ import EmptyState from '../../ui/EmptyState'
 import { useJournalEntry, useJournalList, type JournalEntry } from './queries'
 import JournalEditor from './JournalEditor'
 import { getMoodColor } from './moodColors'
-import { toDateString, addDays } from '../../lib/dates'
+import { toDateString } from '../../lib/dates'
 
 interface EntryDayParts {
   dayNum: number
@@ -59,11 +59,14 @@ function PastEntryRow({
         </span>
       </div>
 
-      {/* Right column: mood tag + full body text */}
+      {/* Right column: title/mood tag + full body text */}
       <div className="flex-1 min-w-0 flex flex-col gap-1.5">
         {entry.mood_tag && (
-          <span className="text-[10px] text-accent uppercase tracking-[0.1em] font-medium">
-            {entry.mood_tag.toUpperCase()}
+          <span
+            className="text-accent uppercase tracking-[0.06em] font-medium"
+            style={{ fontSize: '15px' }}
+          >
+            {entry.mood_tag}
           </span>
         )}
         <p className="text-sm text-text-primary leading-[1.65] whitespace-pre-wrap break-words">
@@ -81,21 +84,6 @@ export default function JournalTab() {
   const { data: currentEntry, isLoading: loadingEntry } = useJournalEntry(selectedDate)
   const { data: pastEntries = [], isLoading: loadingList } = useJournalList(50)
 
-  function goToPrev() {
-    const [y, m, d] = selectedDate.split('-').map(Number)
-    setSelectedDate(toDateString(addDays(new Date(y, m - 1, d), -1)))
-  }
-
-  function goToNext() {
-    const [y, m, d] = selectedDate.split('-').map(Number)
-    const next = addDays(new Date(y, m - 1, d), 1)
-    if (toDateString(next) <= todayStr) {
-      setSelectedDate(toDateString(next))
-    }
-  }
-
-  const isToday = selectedDate === todayStr
-
   return (
     <div className="flex flex-col">
       {/* Composer */}
@@ -109,10 +97,8 @@ export default function JournalTab() {
             key={selectedDate}
             date={selectedDate}
             entry={currentEntry ?? null}
-            isToday={isToday}
-            onPrev={goToPrev}
-            onNext={goToNext}
-            canGoNext={!isToday}
+            maxDate={todayStr}
+            onDateChange={setSelectedDate}
           />
         )}
       </div>
