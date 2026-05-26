@@ -1,16 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { CaretLeft, CaretRight } from '@phosphor-icons/react'
-import IconButton from '../../ui/IconButton'
 import { useUpsertJournalEntry, type JournalEntry } from './queries'
 import { useToast } from '../../ui/Toast'
 
 interface JournalEditorProps {
   date: string
   entry: JournalEntry | null
-  isToday: boolean
-  onPrev: () => void
-  onNext: () => void
-  canGoNext: boolean
+  maxDate: string
+  onDateChange: (date: string) => void
 }
 
 const WORD_WARN = 180
@@ -23,14 +19,6 @@ function countWords(text: string): number {
   return trimmed.split(/\s+/).length
 }
 
-function formatDayLabel(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(y, m - 1, d)
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
-  const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-  return `${weekday} · ${month} ${d}`
-}
-
 function formatTime(date: Date): string {
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -40,7 +28,7 @@ function formatTime(date: Date): string {
   })
 }
 
-export default function JournalEditor({ date, entry, isToday, onPrev, onNext, canGoNext }: JournalEditorProps) {
+export default function JournalEditor({ date, entry, maxDate, onDateChange }: JournalEditorProps) {
   const [body, setBody] = useState(entry?.body ?? '')
   const [moodTag, setMoodTag] = useState(entry?.mood_tag ?? '')
   const [savedAt, setSavedAt] = useState<Date | null>(null)
@@ -116,35 +104,33 @@ export default function JournalEditor({ date, entry, isToday, onPrev, onNext, ca
 
   return (
     <div className="flex flex-col">
-      {/* Header row: navigation + date label + word count */}
+      {/* Header row: date picker + word count */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-1">
-          <IconButton label="Previous day" onClick={onPrev}>
-            <CaretLeft size={12} weight="bold" aria-hidden="true" />
-          </IconButton>
-          <div className="flex items-center gap-2 px-1">
-            <span className="text-2xs text-accent uppercase tracking-[0.1em] font-medium">
-              {isToday ? 'TODAY' : 'PAST ENTRY'}
-            </span>
-            <span className="text-2xs text-text-muted uppercase tracking-[0.05em]">
-              {formatDayLabel(date)}
-            </span>
-          </div>
-          <IconButton label="Next day" onClick={onNext} disabled={!canGoNext}>
-            <CaretRight size={12} weight="bold" aria-hidden="true" />
-          </IconButton>
-        </div>
+        <input
+          type="date"
+          value={date}
+          max={maxDate}
+          onChange={(e) => { if (e.target.value) onDateChange(e.target.value) }}
+          style={{ accentColor: 'var(--color-accent)', colorScheme: 'dark' }}
+          className="
+            h-8 px-2 rounded bg-transparent border border-border-default
+            text-sm text-text-secondary
+            outline-none focus:border-accent
+            transition-colors duration-[120ms] ease-out
+            cursor-pointer
+          "
+        />
         <span className={`text-2xs uppercase tracking-[0.06em] font-medium ${wordCountColor}`}>
           {wordCount} / {WORD_LIMIT}
         </span>
       </div>
 
-      {/* Mood/tone input — flat, no border, no background */}
+      {/* Title/mood input — flat, no border, no background */}
       <input
         type="text"
         value={moodTag}
         onChange={(e) => handleMoodChange(e.target.value)}
-        placeholder="How does today feel? (e.g. FOCUSED, CALM, REFLECTIVE)"
+        placeholder="Title of the entry..."
         className="
           w-full bg-transparent border-none outline-none
           text-sm text-text-secondary placeholder:text-text-muted

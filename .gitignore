@@ -16,6 +16,7 @@ dist-ssr
 
 /.claude
 plan.md
+/supabase
 
 # Editor directories and files
 .vscode/*

@@ -1,6 +1,7 @@
 interface NumberInputProps {
   value?: number | string
   onChange?: (value: number | '') => void
+  onBlur?: () => void
   min?: number
   max?: number
   step?: number
@@ -15,6 +16,7 @@ interface NumberInputProps {
 export default function NumberInput({
   value,
   onChange,
+  onBlur,
   min,
   max,
   step = 1,
@@ -47,6 +49,7 @@ export default function NumberInput({
           const v = e.target.value
           onChange?.(v === '' ? '' : parseFloat(v))
         }}
+        onBlur={onBlur}
         className={`
           w-full h-9 px-3 rounded-md bg-bg-deep border border-border-default
           text-text-primary text-base placeholder:text-text-muted tabular-nums

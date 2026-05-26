@@ -12,7 +12,7 @@ export default function Panel({ eyebrow, title, right, children, className = '' 
   const hasHeader = eyebrow || title || right
 
   return (
-    <div className={`bg-bg-base border border-border-default rounded-lg overflow-hidden ${className}`}>
+    <div className={`${className}`}>
       {hasHeader && (
         <div className="h-10 flex items-center justify-between px-panel-sm lg:px-panel border-b border-border-subtle flex-shrink-0">
           <div>

@@ -32,8 +32,8 @@ function AuthedRoutes() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/sleep" element={<SleepPage />} />
           <Route path="/todo" element={<TodoPage />} />
-          <Route path="/journal" element={<JournalLibraryPage defaultTab="journal" />} />
-          <Route path="/library" element={<JournalLibraryPage defaultTab="library" />} />
+          <Route path="/journal" element={<JournalLibraryPage />} />
+          <Route path="/library" element={<Navigate to="/journal?tab=library" replace />} />
           <Route path="/finance" element={<FinancePage />} />
           <Route path="/body" element={<BodyPage />} />
           <Route path="/food" element={<FoodPage />} />
