@@ -83,6 +83,7 @@ create table public.tasks (
   start_date              date not null,
   end_date                date,
   deleted_at              timestamptz,
+  sort_order              integer,
   created_at              timestamptz not null default now(),
   updated_at              timestamptz not null default now(),
   constraint tasks_weekly_needs_dow check (recurrence_type <> 'weekly' or recurrence_day_of_week is not null),
