@@ -14,9 +14,17 @@ import {
   ArrowUp,
   ForkKnife,
   CookingPot,
-  CalendarCheck,
   Gear,
 } from '@phosphor-icons/react'
+
+function HangerIcon() {
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3c1.5 0 3 1 3 3s-3 3-3 3" />
+      <path d="M12 9L3 19h18L12 9z" />
+    </svg>
+  )
+}
 
 const navItems = [
   { label: 'Dashboard',  path: '/',                    icon: <SquaresFour  size={18} weight="light" aria-hidden="true" /> },
@@ -24,12 +32,12 @@ const navItems = [
   { label: 'To-do',      path: '/todo',                icon: <CheckSquare  size={18} weight="light" aria-hidden="true" /> },
   { label: 'Journal',    path: '/journal',             icon: <NotePencil   size={18} weight="light" aria-hidden="true" /> },
   { label: 'Library',    path: '/journal?tab=library', icon: <Books        size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Wardrobe',   path: '/wardrobe',            icon: <HangerIcon /> },
   { label: 'Finance',    path: '/finance',             icon: <Diamond      size={18} weight="light" aria-hidden="true" /> },
   { label: 'Workouts',   path: '/workouts',            icon: <Barbell      size={18} weight="light" aria-hidden="true" /> },
   { label: 'Body',       path: '/body',                icon: <ArrowUp      size={18} weight="light" aria-hidden="true" /> },
   { label: 'Food',       path: '/food',                icon: <ForkKnife    size={18} weight="light" aria-hidden="true" /> },
   { label: 'Meal Prep',  path: '/mealprep',            icon: <CookingPot   size={18} weight="light" aria-hidden="true" /> },
-  { label: 'Weekly',     path: '/weekly',              icon: <CalendarCheck size={18} weight="light" aria-hidden="true" /> },
   { label: 'Settings',   path: '/settings',            icon: <Gear         size={18} weight="light" aria-hidden="true" /> },
 ]
 

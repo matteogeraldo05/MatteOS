@@ -238,7 +238,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
           <input
             type="number"
             inputMode="decimal"
-            step="0.25"
+            step="any"
             min="0"
             max="24"
             value={hours}

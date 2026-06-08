@@ -165,7 +165,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
                 type="number"
                 inputMode="numeric"
                 min={5}
-                max={480}
+                max={1440}
                 step={5}
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
