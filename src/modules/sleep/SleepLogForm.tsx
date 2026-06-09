@@ -170,7 +170,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
 
         {/* Bed time row */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+          <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
             Bed time
           </label>
           <div className="flex gap-2">
@@ -193,7 +193,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
 
         {/* Wake time row */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+          <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
             Wake time
           </label>
           <div className="flex gap-2">
@@ -222,7 +222,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
         {/* Hours (auto-computed, can override) */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+            <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               Hours slept
             </label>
             {hoursManual && (
@@ -238,7 +238,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
           <input
             type="number"
             inputMode="decimal"
-            step="0.25"
+            step="any"
             min="0"
             max="24"
             value={hours}
@@ -257,7 +257,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
 
         {/* Quality */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+          <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
             Sleep quality
           </label>
           <QualityPicker value={quality} onChange={setQuality} />
@@ -268,7 +268,7 @@ export default function SleepLogForm({ initialDate, existingLog, onClose }: Slee
 
         {/* Notes */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+          <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
             Notes <span className="normal-case text-text-muted">(optional)</span>
           </label>
           <textarea

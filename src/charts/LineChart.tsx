@@ -13,16 +13,20 @@ interface LineChartProps {
   onPointClick?: (datum: LineDatum) => void
 }
 
-export default function LineChart({ data, unit = '', height = 200, onPointClick }: LineChartProps) {
+export default function LineChart({ data, unit = '', height = 180, onPointClick }: LineChartProps) {
   const [selected, setSelected] = useState<number | null>(null)
 
-  const SVG_H = height
+  // Fixed 600-unit X coordinate space so elements render at ~1:1 pixel scale
+  // on a typical content-area width, avoiding the distortion that comes from
+  // a 100-unit X viewBox with preserveAspectRatio="none" (X scale >> Y scale).
+  const SVG_W   = 600
+  const SVG_H   = height
   const PAD_TOP = 16
   const PAD_BOT = 28
-  const PAD_L = 8
-  const PAD_R = 8
-  const plotH = SVG_H - PAD_TOP - PAD_BOT
-  const plotW = 100 - PAD_L - PAD_R
+  const PAD_L   = 8
+  const PAD_R   = 8
+  const plotH   = SVG_H - PAD_TOP - PAD_BOT
+  const plotW   = SVG_W - PAD_L - PAD_R
 
   const { minY, maxY } = useMemo(() => {
     if (data.length === 0) return { minY: 0, maxY: 10 }
@@ -53,16 +57,36 @@ export default function LineChart({ data, unit = '', height = 200, onPointClick 
   }, [data, minY, maxY])
 
   return (
-    <div className="relative w-full" style={{ height: SVG_H }}>
-      <svg width="100%" height={SVG_H} viewBox={`0 0 100 ${SVG_H}`} preserveAspectRatio="none">
+    <div className="relative w-full" style={{ height: `${SVG_H}px` }}>
+      <svg
+        width="100%"
+        height={SVG_H}
+        viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+        preserveAspectRatio="none"
+      >
         {/* Grid */}
         {gridTicks.map(({ val, y }) => (
-          <line key={val} x1={PAD_L} x2={100 - PAD_R} y1={y} y2={y} stroke={chartTheme.grid} strokeWidth="0.4" />
+          <line
+            key={val}
+            x1={PAD_L}
+            x2={SVG_W - PAD_R}
+            y1={y}
+            y2={y}
+            stroke={chartTheme.grid}
+            strokeWidth="0.4"
+          />
         ))}
 
         {/* Line */}
         {data.length > 1 && (
-          <path d={pathD} fill="none" stroke={chartTheme.bar} strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+          <path
+            d={pathD}
+            fill="none"
+            stroke={chartTheme.bar}
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
         )}
 
         {/* Points */}
@@ -75,10 +99,10 @@ export default function LineChart({ data, unit = '', height = 200, onPointClick 
               key={i}
               cx={cx}
               cy={cy}
-              r={isSel ? 2.5 : 1.5}
+              r={isSel ? 4 : 2.5}
               fill={chartTheme.bar}
               stroke={isSel ? 'var(--color-border-strong)' : 'none'}
-              strokeWidth={isSel ? 0.6 : 0}
+              strokeWidth={isSel ? 1 : 0}
               style={{ cursor: onPointClick ? 'pointer' : 'default' }}
               onClick={() => {
                 setSelected(i)
@@ -88,7 +112,7 @@ export default function LineChart({ data, unit = '', height = 200, onPointClick 
           )
         })}
 
-        {/* X labels */}
+        {/* X labels — placed within PAD_BOT (28px bottom margin, labels at y=173) */}
         {data.map((d, i) => (
           <text
             key={i}
@@ -96,7 +120,7 @@ export default function LineChart({ data, unit = '', height = 200, onPointClick 
             y={SVG_H - PAD_BOT / 4}
             textAnchor="middle"
             fill={chartTheme.axisColor}
-            fontSize="3"
+            fontSize="10"
             fontFamily="var(--font-mono)"
           >
             {d.x}

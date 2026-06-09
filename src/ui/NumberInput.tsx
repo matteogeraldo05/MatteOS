@@ -31,7 +31,7 @@ export default function NumberInput({
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+        <label htmlFor={inputId} className="text-2xs text-text-muted uppercase tracking-[0.08em]">
           {label}
         </label>
       )}

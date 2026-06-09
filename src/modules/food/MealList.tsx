@@ -53,7 +53,7 @@ export default function MealList({ meals, date, onAddClick }: MealListProps) {
         {meals.map((meal) => (
           <li
             key={meal.id}
-            className="flex items-start gap-3 py-3 group hover:bg-bg-hover transition-colors duration-[120ms] rounded-md px-2 -mx-2"
+            className="flex items-start gap-3 py-3 group hover:bg-bg-hover transition-colors duration-[120ms]"
           >
             {/* Description */}
             <div className="flex-1 min-w-0">

@@ -49,7 +49,7 @@ function PastEntryRow({
     >
       {/* Left column: big day number + day abbr / month */}
       <div className="flex flex-col items-center w-10 flex-shrink-0 pt-0.5">
-        <span className="text-[28px] font-medium text-text-primary leading-none tabular-nums">
+        <span className="text-3xl font-medium text-text-primary leading-none tabular-nums">
           {dayNum}
         </span>
         <span className="text-[10px] text-text-muted mt-1.5 leading-tight text-center tracking-[0.04em]">
@@ -62,10 +62,7 @@ function PastEntryRow({
       {/* Right column: title/mood tag + full body text */}
       <div className="flex-1 min-w-0 flex flex-col gap-1.5">
         {entry.mood_tag && (
-          <span
-            className="text-accent uppercase tracking-[0.06em] font-medium"
-            style={{ fontSize: '15px' }}
-          >
+          <span className="text-2xs text-accent uppercase tracking-[0.08em] font-medium">
             {entry.mood_tag}
           </span>
         )}

@@ -145,7 +145,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
         {/* Due time + duration row */}
         <div className="flex gap-3">
           <div className="flex flex-col gap-1.5 flex-1">
-            <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+            <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               Due time <span className="normal-case text-text-muted">(optional)</span>
             </label>
             <input
@@ -157,7 +157,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
             />
           </div>
           <div className="flex flex-col gap-1.5" style={{ width: 100 }}>
-            <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+            <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               Duration
             </label>
             <div className="relative">
@@ -165,7 +165,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
                 type="number"
                 inputMode="numeric"
                 min={5}
-                max={480}
+                max={1440}
                 step={5}
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
@@ -197,7 +197,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
 
         {recType === 'monthly' && (
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+            <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               Day of month
             </label>
             <input
@@ -215,7 +215,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
 
         {/* Start date */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+          <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
             Start date
           </label>
           <input
@@ -230,7 +230,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
         {/* End date */}
         {recType !== 'none' && (
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">
+            <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               End date <span className="normal-case text-text-muted">(optional — leave blank for forever)</span>
             </label>
             <input

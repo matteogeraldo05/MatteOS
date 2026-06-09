@@ -21,7 +21,7 @@ import BodyPage from './modules/body/BodyPage'
 import FoodPage from './modules/food/FoodPage'
 import MealPrepPage from './modules/mealprep/MealPrepPage'
 import WorkoutsPage from './modules/workouts/WorkoutsPage'
-import WeeklyReviewPage from './modules/weekly/WeeklyReviewPage'
+import WardrobePage from './modules/wardrobe/WardrobePage'
 import SettingsPage from './modules/settings/SettingsPage'
 
 function AuthedRoutes() {
@@ -39,7 +39,7 @@ function AuthedRoutes() {
           <Route path="/food" element={<FoodPage />} />
           <Route path="/mealprep" element={<MealPrepPage />} />
           <Route path="/workouts" element={<WorkoutsPage />} />
-          <Route path="/weekly" element={<WeeklyReviewPage />} />
+          <Route path="/wardrobe" element={<WardrobePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

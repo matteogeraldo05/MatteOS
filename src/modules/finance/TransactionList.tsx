@@ -40,7 +40,7 @@ export default function TransactionList({ transactions, onEdit, onAdd }: Transac
           onClick={() => onEdit(t)}
           className="
             flex items-center gap-3 py-3 w-full text-left
-            rounded-sm hover:bg-bg-hover transition-colors duration-[120ms] ease-out
+            hover:bg-bg-hover transition-colors duration-[120ms] ease-out
             cursor-pointer
           "
         >

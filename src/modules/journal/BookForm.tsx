@@ -110,7 +110,7 @@ export default function BookForm({ existing, onClose }: BookFormProps) {
 
       {/* Color picker */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs text-text-secondary uppercase tracking-[0.06em]">Cover Color</span>
+        <span className="text-2xs text-text-muted uppercase tracking-[0.08em]">Cover Color</span>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
             <button

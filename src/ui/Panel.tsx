@@ -17,7 +17,7 @@ export default function Panel({ eyebrow, title, right, children, className = '' 
         <div className="h-10 flex items-center justify-between px-panel-sm lg:px-panel border-b border-border-subtle flex-shrink-0">
           <div>
             {eyebrow && (
-              <span className="text-2xs text-text-secondary uppercase tracking-[0.08em] font-medium">
+              <span className="text-2xs text-text-muted uppercase tracking-[0.08em] font-medium">
                 {eyebrow}
               </span>
             )}
