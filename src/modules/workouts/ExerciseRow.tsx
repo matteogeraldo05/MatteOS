@@ -88,7 +88,7 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
         </p>
       ) : (
         <div className="flex gap-3 items-end">
-          <div className="w-[60px]">
+          <div className="w-[48px]">
             <NumberInput
               label="Sets"
               value={data.sets}
@@ -98,7 +98,7 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
               step={1}
             />
           </div>
-          <div className="w-[60px]">
+          <div className="w-[48px]">
             <NumberInput
               label="Reps"
               value={data.reps}
@@ -108,7 +108,7 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
               step={1}
             />
           </div>
-          <div className="w-[96px]">
+          <div className="w-[80px]">
             <NumberInput
               label="Weight lbs"
               value={data.weight_lbs}

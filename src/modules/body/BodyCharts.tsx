@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
 import type { WeightLogEnriched } from './queries'
-import LineChart from '../../charts/LineChart'
+import { useIsDesktop } from '../../lib/useIsDesktop'
+import { addDays, toDateString } from '../../lib/dates'
+import WeightChart from './WeightChart'
+import BmiChart from './BmiChart'
+import TdeeChart from './TdeeChart'
 import EmptyState from '../../ui/EmptyState'
 
 interface BodyChartsProps {
@@ -8,16 +12,25 @@ interface BodyChartsProps {
   hasProfile: boolean
 }
 
-function buildSeries(data: WeightLogEnriched[], key: keyof WeightLogEnriched) {
-  return data.map((d) => ({
-    x: d.log_date.slice(5), // "MM-DD"
-    y: (d[key] as number | null) ?? 0,
-  }))
-}
-
 export default function BodyCharts({ data, hasProfile }: BodyChartsProps) {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [selectedWeight, setSelectedWeight] = useState<number | null>(null)
+  const isDesktop = useIsDesktop()
+  const n = isDesktop ? 30 : 7
+
+  const today = useMemo(() => new Date(), [])
+
+  const chartData = useMemo(() => {
+    const logMap = new Map(data.map((d) => [d.log_date, d]))
+    return Array.from({ length: n }, (_, i) => {
+      const date  = toDateString(addDays(today, -(n - 1 - i)))
+      const entry = logMap.get(date)
+      return {
+        date,
+        weight_lbs: entry?.weight_lbs ?? null,
+        bmi:        entry?.bmi        ?? null,
+        tdee:       entry?.tdee       ?? null,
+      }
+    })
+  }, [data, n, today])
 
   if (data.length === 0) {
     return (
@@ -25,44 +38,23 @@ export default function BodyCharts({ data, hasProfile }: BodyChartsProps) {
     )
   }
 
-  const weightSeries = buildSeries(data, 'weight_lbs')
-  const bmiSeries = data.map((d) => ({ x: d.log_date.slice(5), y: d.bmi ?? 0 }))
-  const tdeeSeries = data.map((d) => ({ x: d.log_date.slice(5), y: d.tdee ?? 0 }))
-
-  const hasBMI = hasProfile && data.some((d) => d.bmi !== null)
+  const hasBMI  = hasProfile && data.some((d) => d.bmi  !== null)
   const hasTDEE = hasProfile && data.some((d) => d.tdee !== null)
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Selected point tooltip */}
-      {selectedDate && selectedWeight !== null && (
-        <p className="text-sm text-text-secondary tabular-nums">
-          {selectedDate}: <span className="text-text-primary font-medium">{selectedWeight.toFixed(1)} lbs</span>
-        </p>
-      )}
 
       {/* Weight chart */}
       <div>
-        <p className="text-2xs text-text-secondary uppercase tracking-[0.08em] mb-2">Weight (lbs)</p>
-        <LineChart
-          data={weightSeries}
-          unit=" lbs"
-          height={180}
-          onPointClick={(d) => {
-            setSelectedDate(d.x)
-            setSelectedWeight(d.y)
-          }}
-        />
+        <p className="text-2xs text-text-muted uppercase tracking-[0.08em] mb-2">Weight (lbs)</p>
+        <WeightChart data={chartData} />
       </div>
 
       {/* BMI chart */}
       <div>
-        <p className="text-2xs text-text-secondary uppercase tracking-[0.08em] mb-2">BMI</p>
+        <p className="text-2xs text-text-muted uppercase tracking-[0.08em] mb-2">BMI</p>
         {hasBMI ? (
-          <LineChart
-            data={bmiSeries.filter((d) => d.y !== 0)}
-            height={180}
-          />
+          <BmiChart data={chartData} />
         ) : (
           <EmptyState message="Set height, sex, and birth date in Settings to see BMI." />
         )}
@@ -70,17 +62,14 @@ export default function BodyCharts({ data, hasProfile }: BodyChartsProps) {
 
       {/* TDEE chart */}
       <div>
-        <p className="text-2xs text-text-secondary uppercase tracking-[0.08em] mb-2">TDEE (kcal/day)</p>
+        <p className="text-2xs text-text-muted uppercase tracking-[0.08em] mb-2">TDEE (kcal)</p>
         {hasTDEE ? (
-          <LineChart
-            data={tdeeSeries.filter((d) => d.y !== 0)}
-            unit=" kcal"
-            height={180}
-          />
+          <TdeeChart data={chartData} />
         ) : (
           <EmptyState message="Set your profile to see estimated TDEE." />
         )}
       </div>
+
     </div>
   )
 }

@@ -73,7 +73,7 @@ export default function ItemForm({ open, onClose, onSave, initial, defaultStatus
 
         {/* Tags */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-text-secondary uppercase tracking-[0.06em]">Tags</span>
+          <span className="text-2xs text-text-muted uppercase tracking-[0.08em]">Tags</span>
           <div className="flex flex-wrap gap-2">
             {TAG_OPTIONS.map(({ value, label }) => (
               <label key={value} className="flex items-center gap-1.5 cursor-pointer select-none">

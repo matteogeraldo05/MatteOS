@@ -57,7 +57,7 @@ export default function WeightLogForm({ initialDate, initialWeight, onSaved }: W
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-text-secondary uppercase tracking-[0.06em]">Date</label>
+          <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">Date</label>
           <DateInput
             value={date}
             onChange={(v) => setDate(v)}

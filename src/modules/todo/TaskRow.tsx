@@ -11,18 +11,21 @@ const TAG_LABELS: Record<TaskTag, string> = {
   finance: 'FINANCE',
 }
 
+const TAG_COLORS: Record<TaskTag, string> = {
+  gym:      'var(--color-accent)',
+  personal: 'var(--color-success)',
+  work:     'var(--color-warning)',
+  finance:  'var(--color-text-secondary)',
+}
+
 function TagPill({ tag }: { tag: TaskTag }) {
-  const isGym = tag === 'gym'
   return (
     <span
-      className={`
-        inline-flex items-center text-2xs font-medium uppercase tracking-[0.06em]
-        px-2 py-0.5 rounded-sm flex-shrink-0
-        ${isGym
-          ? 'bg-accent text-white'
-          : 'border border-border-default text-text-muted'
-        }
-      `}
+      className="inline-flex items-center text-2xs font-medium uppercase tracking-[0.06em] px-2 py-0.5 flex-shrink-0 text-text-secondary"
+      style={{
+        borderLeft: `3px solid ${TAG_COLORS[tag]}`,
+        background: 'var(--color-bg-raised)',
+      }}
     >
       {TAG_LABELS[tag]}
     </span>
@@ -161,7 +164,7 @@ export default function TaskRow({
       onDrop={showGrip ? onDrop : undefined}
       onDragEnd={showGrip ? onDragEnd : undefined}
       className={`
-        flex items-center gap-3 px-4 py-3
+        flex items-center gap-3 px-4 py-2
         ${readOnly ? 'cursor-default' : 'cursor-pointer hover:bg-bg-hover'}
         transition-colors duration-[120ms] ease-out
         select-none

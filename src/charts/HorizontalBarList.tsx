@@ -12,19 +12,21 @@ export default function HorizontalBarList({ items, format = String }: Horizontal
   const max = Math.max(...items.map((i) => i.value), 1)
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {items.map((item) => {
         const pct = (item.value / max) * 100
         return (
-          <div key={item.label} className="relative h-6 flex items-center">
-            {/* Bar fill */}
-            <div
-              className="absolute inset-y-0 left-0 rounded-sm"
-              style={{ width: `${pct}%`, background: 'var(--color-accent-soft)' }}
-            />
-            {/* Labels */}
-            <span className="relative z-10 text-sm text-text-secondary px-2 flex-1 truncate">{item.label}</span>
-            <span className="relative z-10 text-sm text-text-secondary tabular-nums px-2">{format(item.value)}</span>
+          <div key={item.label} className="flex items-center gap-3 py-2.5">
+            <span className="text-sm text-text-secondary w-28 flex-shrink-0 truncate">{item.label}</span>
+            <div className="flex-1 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${pct}%`, background: 'var(--color-accent-soft)' }}
+              />
+            </div>
+            <span className="text-sm text-text-secondary tabular-nums w-20 text-right flex-shrink-0">
+              {format(item.value)}
+            </span>
           </div>
         )
       })}

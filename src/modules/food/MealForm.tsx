@@ -145,7 +145,7 @@ export default function MealForm({
 
         {/* Calories + Estimate button */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-text-secondary uppercase tracking-[0.06em]">Calories</span>
+          <span className="text-2xs text-text-muted uppercase tracking-[0.08em]">Calories</span>
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <NumberInput

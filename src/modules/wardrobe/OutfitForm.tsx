@@ -53,7 +53,7 @@ export default function OutfitForm({ open, onClose, onSave, loading }: OutfitFor
 
         {/* Item picker */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-text-secondary uppercase tracking-[0.06em]">Items from closet</span>
+          <span className="text-2xs text-text-muted uppercase tracking-[0.08em]">Items from closet</span>
 
           {itemsLoading ? (
             <div className="flex justify-center py-4">
