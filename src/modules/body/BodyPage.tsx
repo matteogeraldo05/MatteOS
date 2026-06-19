@@ -1,21 +1,29 @@
 import { useState, useMemo } from 'react'
-import { useWeightLogs, useRecentWeightLogs } from './queries'
+import { useWeightLogs } from './queries'
 import { useAuth } from '../../auth/AuthProvider'
 import { todayInTz } from '../../lib/dates'
-import { ArrowUp } from '@phosphor-icons/react'
+import { Plus } from '@phosphor-icons/react'
 import ScreenHeader from '../../ui/ScreenHeader'
 import Panel from '../../ui/Panel'
 import MetricCard from '../../ui/MetricCard'
 import Toggle from '../../ui/Toggle'
+import Modal from '../../ui/Modal'
+import Button from '../../ui/Button'
 import Spinner from '../../ui/Spinner'
 import BodyCharts from './BodyCharts'
 import BodyTable from './BodyTable'
 import WeightLogForm from './WeightLogForm'
-import RecentWeightsList from './RecentWeightsList'
 
-function fmt(val: number | null | undefined, decimals = 1): string {
-  if (val === null || val === undefined) return '—'
-  return val.toFixed(decimals)
+function PersonIcon() {
+  return (
+    <svg
+      width={22} height={22} viewBox="0 0 256 256"
+      fill="currentColor" aria-hidden="true"
+      className="text-accent"
+    >
+      <path d="M128,40a32,32,0,1,0,32,32A32,32,0,0,0,128,40Zm0,56a24,24,0,1,1,24-24A24,24,0,0,1,128,96Zm48,24H80a24,24,0,0,0-24,24v48a8,8,0,0,0,16,0V144a8,8,0,0,1,8-8h96a8,8,0,0,1,8,8v48a8,8,0,0,0,16,0V144A24,24,0,0,0,176,120Z" />
+    </svg>
+  )
 }
 
 export default function BodyPage() {
@@ -24,8 +32,8 @@ export default function BodyPage() {
   const today = todayInTz(tz)
 
   const [view, setView] = useState<'chart' | 'table'>('chart')
+  const [logOpen, setLogOpen] = useState(false)
 
-  // 30-day range ending today
   const rangeEnd = useMemo(() => new Date(today + 'T00:00:00'), [today])
   const rangeStart = useMemo(() => {
     const d = new Date(rangeEnd)
@@ -34,21 +42,21 @@ export default function BodyPage() {
   }, [rangeEnd])
 
   const { data: chartData = [], isLoading: chartLoading } = useWeightLogs(rangeStart, rangeEnd)
-  const { data: recentData = [], isLoading: recentLoading } = useRecentWeightLogs(10)
 
-  // Latest entry for MetricCards
   const latest = chartData.length > 0 ? chartData[chartData.length - 1] : null
-
   const hasProfile = !!(profile?.height_cm && profile?.birth_date && profile?.sex)
+
+  const weightDisplay = latest ? String(Math.round(latest.weight_lbs)) : '—'
+  const bmiDisplay    = hasProfile && latest?.bmi != null ? latest.bmi.toFixed(1) : '—'
+  const tdeeDisplay   = hasProfile && latest?.tdee != null ? Math.round(latest.tdee).toString() : '—'
 
   return (
     <>
       <ScreenHeader
         title="Body"
-        icon={<ArrowUp size={22} weight="light" className="text-accent" aria-hidden="true" />}
+        icon={<PersonIcon />}
       />
 
-      {/* Panel A — Charts / Table */}
       <Panel
         eyebrow="Body"
         right={
@@ -64,23 +72,20 @@ export default function BodyPage() {
       >
         {/* Metric cards row */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <MetricCard
-            label="Weight"
-            value={fmt(latest?.weight_lbs)}
-            unit={latest ? 'lbs' : undefined}
-          />
+          <MetricCard label="Weight (lbs)" value={weightDisplay} />
           <MetricCard
             label="BMI"
-            value={fmt(latest?.bmi)}
+            value={bmiDisplay}
+            subtext={!hasProfile ? 'Set up in Settings' : undefined}
           />
           <MetricCard
             label="TDEE"
-            value={latest?.tdee !== null && latest?.tdee !== undefined ? Math.round(latest.tdee).toString() : '—'}
-            unit={latest?.tdee !== null && latest?.tdee !== undefined ? 'kcal' : undefined}
+            value={tdeeDisplay}
+            unit={hasProfile && latest?.tdee != null ? 'kcal' : undefined}
+            subtext={!hasProfile ? 'Set up in Settings' : undefined}
           />
         </div>
 
-        {/* Chart or Table */}
         {chartLoading ? (
           <div className="flex justify-center py-12">
             <Spinner size={20} />
@@ -92,24 +97,26 @@ export default function BodyPage() {
         )}
       </Panel>
 
-      {/* Panel B — Log Weight */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-        {/* Left: form */}
-        <Panel eyebrow="Log Weight">
-          <WeightLogForm />
-        </Panel>
-
-        {/* Right: recent entries */}
-        <Panel eyebrow="Recent Entries">
-          {recentLoading ? (
-            <div className="flex justify-center py-8">
-              <Spinner size={16} />
-            </div>
-          ) : (
-            <RecentWeightsList entries={recentData} />
-          )}
-        </Panel>
+      {/* Log Weight CTA */}
+      <div className="py-6">
+        <Button
+          variant="primary"
+          onClick={() => setLogOpen(true)}
+          className="w-full h-12 text-base justify-center gap-2"
+        >
+          <Plus size={16} weight="bold" aria-hidden="true" />
+          Log Weight
+        </Button>
       </div>
+
+      {/* Log Weight Modal */}
+      <Modal
+        open={logOpen}
+        onClose={() => setLogOpen(false)}
+        title="Log weight"
+      >
+        <WeightLogForm onSaved={() => setLogOpen(false)} />
+      </Modal>
     </>
   )
 }

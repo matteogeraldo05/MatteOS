@@ -55,8 +55,8 @@ export default function WeightLogForm({ initialDate, initialWeight, onSaved }: W
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-1.5 flex-1 min-w-0" style={{ minWidth: 120 }}>
           <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">Date</label>
           <DateInput
             value={date}
@@ -65,16 +65,18 @@ export default function WeightLogForm({ initialDate, initialWeight, onSaved }: W
           />
         </div>
 
-        <NumberInput
-          label="Weight (lbs)"
-          value={weight}
-          onChange={(v) => { setWeight(v); setError(undefined) }}
-          min={0}
-          max={999}
-          step={0.1}
-          placeholder="0.0"
-          error={error}
-        />
+        <div className="flex-1 min-w-0" style={{ minWidth: 120 }}>
+          <NumberInput
+            label="Weight (lbs)"
+            value={weight}
+            onChange={(v) => { setWeight(v); setError(undefined) }}
+            min={0}
+            max={999}
+            step={0.1}
+            placeholder="0.0"
+            error={error}
+          />
+        </div>
       </div>
 
       <Button

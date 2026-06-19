@@ -42,6 +42,7 @@ interface SleepChartProps {
   rangeStart: Date
   rangeEnd: Date
   goal: number
+  rangeLabel?: string
   onBarClick: (date: string, log: SleepLog | null) => void
 }
 
@@ -50,6 +51,7 @@ export default function SleepChart({
   rangeStart,
   rangeEnd,
   goal,
+  rangeLabel: rangeLabelProp,
   onBarClick,
 }: SleepChartProps) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -92,7 +94,7 @@ export default function SleepChart({
     () => logs.filter((l) => l.hours >= goal).length,
     [logs, goal],
   )
-  const rangeLabel      = daysInRange <= 7 ? 'LAST 7 DAYS' : `LAST ${daysInRange} DAYS`
+  const rangeLabel      = rangeLabelProp ?? (daysInRange <= 7 ? '7 DAYS' : `${daysInRange} DAYS`)
   const goalLabel       = Number.isInteger(goal) ? `${goal}H` : `${goal}H`
 
   // ── Bar geometry ──────────────────────────────────────────────────────────

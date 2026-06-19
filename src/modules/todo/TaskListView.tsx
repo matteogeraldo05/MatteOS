@@ -53,11 +53,23 @@ export default function TaskListView({
     setLocalList(instances)
   }, [instances])
 
-  // ── Drag state ────────────────────────────────────────────────────────────
+  // ── Overdue local state ───────────────────────────────────────────────────
+  const [localOverdueList, setLocalOverdueList] = useState(overdueInstances)
+  useEffect(() => {
+    setLocalOverdueList(overdueInstances)
+  }, [overdueInstances])
+
+  // ── Drag state (today) ────────────────────────────────────────────────────
   const draggingId     = useRef<string | null>(null)
-  const [activeId,    setActiveId]    = useState<string | null>(null)   // row being dragged
-  const [overId,      setOverId]      = useState<string | null>(null)   // row being hovered
+  const [activeId,    setActiveId]    = useState<string | null>(null)
+  const [overId,      setOverId]      = useState<string | null>(null)
   const [dropPos,     setDropPos]     = useState<'above' | 'below'>('below')
+
+  // ── Drag state (overdue) ──────────────────────────────────────────────────
+  const overdueDraggingId   = useRef<string | null>(null)
+  const [overdueActiveId,   setOverdueActiveId]   = useState<string | null>(null)
+  const [overdueOverId,     setOverdueOverId]     = useState<string | null>(null)
+  const [overdueDropPos,    setOverdueDropPos]    = useState<'above' | 'below'>('below')
 
   // ── Touch-drag refs (keep doc-level handlers stable with empty-dep effect) ──
   const overIdRef       = useRef<string | null>(null)
@@ -67,6 +79,12 @@ export default function TaskListView({
   const addListenersRef = useRef<() => void>(() => {})
   localListRef.current  = localList          // always current
   doUpdateOrder.current = updateOrder.mutate // always current
+
+  const overdueOverIdRef       = useRef<string | null>(null)
+  const overdueDropPosRef      = useRef<'above' | 'below'>('below')
+  const localOverdueListRef    = useRef(localOverdueList)
+  const addOverdueListenersRef = useRef<() => void>(() => {})
+  localOverdueListRef.current  = localOverdueList
 
   function handleDragStart(e: React.DragEvent, id: string) {
     draggingId.current = id
@@ -119,6 +137,54 @@ export default function TaskListView({
     draggingId.current = null
     setActiveId(null)
     setOverId(null)
+  }
+
+  // ── Overdue mouse drag handlers ───────────────────────────────────────────
+  function handleOverdueDragStart(e: React.DragEvent, id: string) {
+    overdueDraggingId.current = id
+    setOverdueActiveId(id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  function handleOverdueDragOver(e: React.DragEvent, id: string) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (id === overdueDraggingId.current) return
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const pos: 'above' | 'below' = e.clientY < rect.top + rect.height / 2 ? 'above' : 'below'
+    setOverdueOverId(id)
+    setOverdueDropPos(pos)
+  }
+
+  function handleOverdueDragLeave(e: React.DragEvent) {
+    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+      setOverdueOverId(null)
+    }
+  }
+
+  function handleOverdueDrop(e: React.DragEvent, toId: string) {
+    e.preventDefault()
+    const fromId = overdueDraggingId.current
+    if (!fromId || fromId === toId) { resetOverdueDrag(); return }
+    const reordered = reorder(localOverdueList, fromId, toId, overdueDropPos)
+    setLocalOverdueList(reordered)
+    resetOverdueDrag()
+    const updates = reordered.map((inst, idx) => ({ id: inst.task.id, sort_order: (idx + 1) * 1000 }))
+    updateOrder.mutate(updates)
+  }
+
+  function resetOverdueDrag() {
+    overdueDraggingId.current = null
+    setOverdueActiveId(null)
+    setOverdueOverId(null)
+  }
+
+  function handleOverdueGripTouchStart(_e: React.TouchEvent, id: string) {
+    overdueDraggingId.current = id
+    overdueOverIdRef.current  = null
+    setOverdueActiveId(id)
+    setOverdueOverId(null)
+    addOverdueListenersRef.current()
   }
 
   // ── Touch drag ──────────────────────────────────────────────────────────────
@@ -191,11 +257,67 @@ export default function TaskListView({
       document.addEventListener('touchcancel', onTouchEnd)
     }
 
+    // ── Overdue touch handlers ──────────────────────────────────────────────
+    function onOverdueTouchMove(e: TouchEvent) {
+      if (!overdueDraggingId.current) return
+      e.preventDefault()
+      const touch = e.touches[0]
+      const el    = document.elementFromPoint(touch.clientX, touch.clientY)
+      const row   = el ? (el as HTMLElement).closest<HTMLElement>('[data-overdue-task-id]') : null
+      const toId  = row?.dataset.overdueTaskId ?? null
+      if (!toId || toId === overdueDraggingId.current) {
+        overdueOverIdRef.current = null
+        setOverdueOverId(null)
+        return
+      }
+      const rect = row!.getBoundingClientRect()
+      const pos: 'above' | 'below' = touch.clientY < rect.top + rect.height / 2 ? 'above' : 'below'
+      overdueOverIdRef.current  = toId
+      overdueDropPosRef.current = pos
+      setOverdueOverId(toId)
+      setOverdueDropPos(pos)
+    }
+
+    function overdueCleanup() {
+      document.removeEventListener('touchmove',   onOverdueTouchMove)
+      document.removeEventListener('touchend',    onOverdueTouchEnd)
+      document.removeEventListener('touchcancel', onOverdueTouchEnd)
+      overdueDraggingId.current = null
+      overdueOverIdRef.current  = null
+      setOverdueActiveId(null)
+      setOverdueOverId(null)
+    }
+
+    function onOverdueTouchEnd() {
+      const fromId = overdueDraggingId.current
+      const toId   = overdueOverIdRef.current
+      const pos    = overdueDropPosRef.current
+      overdueCleanup()
+      if (fromId && toId && toId !== fromId) {
+        setLocalOverdueList(prev => {
+          const reordered = reorder(prev, fromId, toId, pos)
+          doUpdateOrder.current(
+            reordered.map((inst, idx) => ({ id: inst.task.id, sort_order: (idx + 1) * 1000 })),
+          )
+          return reordered
+        })
+      }
+    }
+
+    addOverdueListenersRef.current = () => {
+      document.addEventListener('touchmove',   onOverdueTouchMove, { passive: false })
+      document.addEventListener('touchend',    onOverdueTouchEnd)
+      document.addEventListener('touchcancel', onOverdueTouchEnd)
+    }
+
     // Safety: remove any lingering listeners if the component unmounts mid-drag
     return () => {
       document.removeEventListener('touchmove',   onTouchMove)
       document.removeEventListener('touchend',    onTouchEnd)
       document.removeEventListener('touchcancel', onTouchEnd)
+      document.removeEventListener('touchmove',   onOverdueTouchMove)
+      document.removeEventListener('touchend',    onOverdueTouchEnd)
+      document.removeEventListener('touchcancel', onOverdueTouchEnd)
     }
   }, []) // ← intentionally empty: all state is accessed via refs
 
@@ -236,19 +358,37 @@ export default function TaskListView({
             </span>
           </div>
 
-          {overdueInstances.map((instance) => (
-            <div key={`overdue|${instance.task.id}`} className="relative">
-              <TaskRow
-                instance={instance}
-                onToggle={(inst) => toggle.mutate(inst)}
-                onClick={onTaskClick}
-                togglePending={toggle.isPending}
-                overdueDate={instance.task.start_date}
-                showGrip={false}
-              />
-              <div className="border-b border-border-subtle mx-4" />
-            </div>
-          ))}
+          {localOverdueList.map((instance) => {
+            const id = instance.task.id
+            const isDragging = id === overdueActiveId
+            const isOver     = id === overdueOverId && id !== overdueActiveId
+            return (
+              <div key={`overdue|${id}`} data-overdue-task-id={id} className="relative">
+                {isOver && overdueDropPos === 'above' && (
+                  <div className="absolute top-0 left-4 right-4 h-0.5 bg-accent z-20 pointer-events-none" />
+                )}
+                <TaskRow
+                  instance={instance}
+                  onToggle={(inst) => toggle.mutate(inst)}
+                  onClick={onTaskClick}
+                  togglePending={toggle.isPending}
+                  overdueDate={instance.task.start_date}
+                  showGrip={true}
+                  isDragging={isDragging}
+                  onDragStart={(e) => handleOverdueDragStart(e, id)}
+                  onDragOver={(e) => handleOverdueDragOver(e, id)}
+                  onDragLeave={handleOverdueDragLeave}
+                  onDrop={(e) => handleOverdueDrop(e, id)}
+                  onDragEnd={resetOverdueDrag}
+                  onGripTouchStart={(e) => handleOverdueGripTouchStart(e, id)}
+                />
+                <div className="border-b border-border-subtle mx-4" />
+                {isOver && overdueDropPos === 'below' && (
+                  <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent z-20 pointer-events-none" />
+                )}
+              </div>
+            )
+          })}
 
           {/* Thicker divider between OVERDUE and TODAY */}
           <div className="border-b border-border-default mx-0 mt-1 mb-1" />

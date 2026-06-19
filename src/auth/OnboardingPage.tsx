@@ -23,7 +23,7 @@ const sexOptions = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
 
   const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -59,6 +59,7 @@ export default function OnboardingPage() {
         })
 
       if (upsertError) throw upsertError
+      await refreshProfile()
       navigate('/', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')

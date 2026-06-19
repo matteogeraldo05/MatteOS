@@ -144,7 +144,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
 
         {/* Due time + duration row */}
         <div className="flex gap-3">
-          <div className="flex flex-col gap-1.5 flex-1">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-0">
             <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               Due time <span className="normal-case text-text-muted">(optional)</span>
             </label>
@@ -156,7 +156,7 @@ export default function TaskForm({ initialDate, existingTask, onClose }: TaskFor
               className={inputClass}
             />
           </div>
-          <div className="flex flex-col gap-1.5" style={{ width: 100 }}>
+          <div className="flex flex-col gap-1.5 min-w-0" style={{ width: 100 }}>
             <label className="text-2xs text-text-muted uppercase tracking-[0.08em]">
               Duration
             </label>

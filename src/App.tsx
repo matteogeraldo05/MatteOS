@@ -19,7 +19,6 @@ import JournalLibraryPage from './modules/journal/JournalLibraryPage'
 import FinancePage from './modules/finance/FinancePage'
 import BodyPage from './modules/body/BodyPage'
 import FoodPage from './modules/food/FoodPage'
-import MealPrepPage from './modules/mealprep/MealPrepPage'
 import WorkoutsPage from './modules/workouts/WorkoutsPage'
 import WardrobePage from './modules/wardrobe/WardrobePage'
 import SettingsPage from './modules/settings/SettingsPage'
@@ -37,7 +36,6 @@ function AuthedRoutes() {
           <Route path="/finance" element={<FinancePage />} />
           <Route path="/body" element={<BodyPage />} />
           <Route path="/food" element={<FoodPage />} />
-          <Route path="/mealprep" element={<MealPrepPage />} />
           <Route path="/workouts" element={<WorkoutsPage />} />
           <Route path="/wardrobe" element={<WardrobePage />} />
           <Route path="/settings" element={<SettingsPage />} />
