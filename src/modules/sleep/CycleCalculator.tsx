@@ -126,8 +126,16 @@ interface RockerWheelProps {
 }
 
 function RockerWheel({ value, onChange, min, max, display, label }: RockerWheelProps) {
+  const [draft, setDraft] = useState<string | null>(null)
+
   const inc = () => onChange(value >= max ? min : value + 1)
   const dec = () => onChange(value <= min ? max : value - 1)
+
+  function commit(raw: string) {
+    setDraft(null)
+    const n = parseInt(raw, 10)
+    if (!isNaN(n)) onChange(Math.min(max, Math.max(min, n)))
+  }
 
   return (
     <div className="flex flex-col items-center gap-0.5" aria-label={label}>
@@ -139,13 +147,22 @@ function RockerWheel({ value, onChange, min, max, display, label }: RockerWheelP
       >
         <CaretUp size={14} weight="bold" aria-hidden="true" />
       </button>
-      <div
-        className="text-4xl font-bold tabular-nums text-text-primary leading-none py-1"
-        style={{ minWidth: 52, textAlign: 'center' }}
-        aria-live="polite" aria-atomic="true"
-      >
-        {display}
-      </div>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={draft ?? display}
+        onFocus={(e) => { setDraft(display); e.target.select() }}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { commit((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).blur() }
+          if (e.key === 'Escape') { setDraft(null); (e.target as HTMLInputElement).blur() }
+        }}
+        aria-live="polite" aria-atomic="true" aria-label={label}
+        className="text-4xl font-bold tabular-nums text-text-primary leading-none py-1
+          bg-transparent border-none outline-none text-center cursor-text"
+        style={{ minWidth: 64, width: 64 }}
+      />
       <button
         type="button" aria-label={`Decrease ${label}`} onClick={dec}
         className="w-10 h-10 flex items-center justify-center rounded-md cursor-pointer

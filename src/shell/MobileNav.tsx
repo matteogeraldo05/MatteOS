@@ -11,9 +11,8 @@ import {
   Books,
   Diamond,
   Barbell,
-  ArrowUp,
+  Person,
   ForkKnife,
-  CookingPot,
   Gear,
 } from '@phosphor-icons/react'
 
@@ -35,9 +34,8 @@ const navItems = [
   { label: 'Wardrobe',   path: '/wardrobe',            icon: <HangerIcon /> },
   { label: 'Finance',    path: '/finance',             icon: <Diamond      size={18} weight="light" aria-hidden="true" /> },
   { label: 'Workouts',   path: '/workouts',            icon: <Barbell      size={18} weight="light" aria-hidden="true" /> },
-  { label: 'Body',       path: '/body',                icon: <ArrowUp      size={18} weight="light" aria-hidden="true" /> },
+  { label: 'Body',       path: '/body',                icon: <Person       size={18} weight="light" aria-hidden="true" /> },
   { label: 'Food',       path: '/food',                icon: <ForkKnife    size={18} weight="light" aria-hidden="true" /> },
-  { label: 'Meal Prep',  path: '/mealprep',            icon: <CookingPot   size={18} weight="light" aria-hidden="true" /> },
   { label: 'Settings',   path: '/settings',            icon: <Gear         size={18} weight="light" aria-hidden="true" /> },
 ]
 

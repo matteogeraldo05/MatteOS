@@ -10,6 +10,7 @@ interface AuthCtx {
   profile: UserProfile | null
   loading: boolean
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthCtx>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthCtx>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refreshProfile: async () => {},
 })
 
 export function useAuth() {
@@ -25,11 +27,12 @@ export function useAuth() {
 }
 
 async function fetchProfile(userId: string): Promise<UserProfile | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('user_profile')
     .select('*')
     .eq('id', userId)
     .maybeSingle()
+  console.log('[AuthProvider] fetchProfile →', { data, error })
   return data ?? null
 }
 
@@ -63,6 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [handleSession])
 
+  const refreshProfile = useCallback(async () => {
+    if (!user) return
+    const p = await fetchProfile(user.id)
+    setProfile(p)
+  }, [user])
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
     queryClient.clear()
@@ -76,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

@@ -52,6 +52,7 @@ function buildInitialExercises(
       lastSets: prevEx?.sets,
       lastReps: prevEx?.reps,
       lastWeightLbs: prevEx?.weight_lbs,
+      lastNotes: prevEx?.notes ?? null,
     }
   })
 }
@@ -83,6 +84,7 @@ function buildEditExercises(
         lastSets: prevEx?.sets,
         lastReps: prevEx?.reps,
         lastWeightLbs: prevEx?.weight_lbs,
+        lastNotes: prevEx?.notes ?? null,
       }
     })
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NotePencil, Trash } from '@phosphor-icons/react'
+import { NotePencil, PencilSimple, Trash } from '@phosphor-icons/react'
 import NumberInput from '../../ui/NumberInput'
 import Input from '../../ui/Input'
 import Textarea from '../../ui/Textarea'
@@ -16,10 +16,30 @@ export type ExerciseRowData = {
   weight_lbs: number | ''
   notes: string
   isAdHoc: boolean
-  // Hint from last session
+  // Hints from last session
   lastSets?: number
   lastReps?: number
   lastWeightLbs?: number
+  lastNotes?: string | null
+}
+
+// ─── Grip handle ─────────────────────────────────────────────────────────────
+
+function GripHandle() {
+  return (
+    <svg
+      width="12" height="16" viewBox="0 0 12 16" fill="none"
+      aria-hidden="true"
+      className="text-text-disabled flex-shrink-0 cursor-grab active:cursor-grabbing"
+    >
+      <circle cx="3"  cy="3.5"  r="1.3" fill="currentColor" />
+      <circle cx="9"  cy="3.5"  r="1.3" fill="currentColor" />
+      <circle cx="3"  cy="8"    r="1.3" fill="currentColor" />
+      <circle cx="9"  cy="8"    r="1.3" fill="currentColor" />
+      <circle cx="3"  cy="12.5" r="1.3" fill="currentColor" />
+      <circle cx="9"  cy="12.5" r="1.3" fill="currentColor" />
+    </svg>
+  )
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -29,10 +49,21 @@ interface ExerciseRowProps {
   onChange: (updated: ExerciseRowData) => void
   onRemove?: () => void
   readOnly?: boolean
+  isDragging?: boolean
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void
+  onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void
+  onDrop?: (e: React.DragEvent<HTMLDivElement>) => void
+  onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void
+  onGripTouchStart?: (e: React.TouchEvent<HTMLDivElement>) => void
 }
 
-export default function ExerciseRow({ data, onChange, onRemove, readOnly = false }: ExerciseRowProps) {
+export default function ExerciseRow({
+  data, onChange, onRemove, readOnly = false,
+  isDragging, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd, onGripTouchStart,
+}: ExerciseRowProps) {
   const [notesOpen, setNotesOpen] = useState(!!data.notes)
+  const [isRenaming, setIsRenaming] = useState(false)
 
   const hasHint =
     data.lastSets !== undefined &&
@@ -40,10 +71,27 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
     data.lastWeightLbs !== undefined
 
   return (
-    <div className="py-3 border-b border-border-subtle last:border-b-0">
+    <div
+      draggable={!readOnly}
+      onDragStart={!readOnly ? onDragStart : undefined}
+      onDragOver={!readOnly ? onDragOver : undefined}
+      onDragLeave={!readOnly ? onDragLeave : undefined}
+      onDrop={!readOnly ? onDrop : undefined}
+      onDragEnd={!readOnly ? onDragEnd : undefined}
+      className={`py-3 border-b border-border-subtle last:border-b-0 ${isDragging ? 'opacity-40' : ''}`}
+    >
 
       {/* ── Name + controls ─────────────────────────────────── */}
       <div className="flex items-start gap-2 mb-2">
+        {!readOnly && (
+          <div
+            onTouchStart={onGripTouchStart}
+            onClick={(e) => e.stopPropagation()}
+            className="touch-none flex-shrink-0 mt-1"
+          >
+            <GripHandle />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           {data.isAdHoc && !readOnly ? (
             <Input
@@ -51,16 +99,39 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
               onChange={(v) => onChange({ ...data, exercise_name: v })}
               placeholder="Exercise name"
             />
+          ) : isRenaming && !readOnly ? (
+            <Input
+              value={data.exercise_name}
+              onChange={(v) => onChange({ ...data, exercise_name: v })}
+              onBlur={() => setIsRenaming(false)}
+              autoFocus
+            />
           ) : (
             <p className="text-base text-text-primary font-medium leading-snug">{data.exercise_name}</p>
           )}
 
-          {hasHint && (
+          {hasHint && !isRenaming && (
             <p className="text-2xs text-text-muted mt-0.5 tabular-nums">
               last: {data.lastSets}×{data.lastReps} @ {data.lastWeightLbs} lbs
             </p>
           )}
+          {data.lastNotes && !readOnly && !isRenaming && (
+            <p className="text-2xs text-text-muted mt-0.5 italic">
+              Last note: {data.lastNotes}
+            </p>
+          )}
         </div>
+
+        {/* Rename preset exercise (edit mode only) */}
+        {!data.isAdHoc && !readOnly && (
+          <IconButton label="Rename exercise" onClick={() => setIsRenaming((r) => !r)}>
+            <PencilSimple
+              size={14}
+              weight={isRenaming ? 'fill' : 'regular'}
+              className={isRenaming ? 'text-accent' : 'text-text-muted'}
+            />
+          </IconButton>
+        )}
 
         {/* Notes toggle (edit mode only) */}
         {!readOnly && (
@@ -87,8 +158,8 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
           {data.sets}×{data.reps} @ {data.weight_lbs} lbs
         </p>
       ) : (
-        <div className="flex gap-3 items-end">
-          <div className="w-[48px]">
+        <div className="flex gap-3 items-end flex-wrap">
+          <div className="min-w-0" style={{ width: 48 }}>
             <NumberInput
               label="Sets"
               value={data.sets}
@@ -98,7 +169,7 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
               step={1}
             />
           </div>
-          <div className="w-[48px]">
+          <div className="min-w-0" style={{ width: 48 }}>
             <NumberInput
               label="Reps"
               value={data.reps}
@@ -108,7 +179,7 @@ export default function ExerciseRow({ data, onChange, onRemove, readOnly = false
               step={1}
             />
           </div>
-          <div className="w-[80px]">
+          <div className="min-w-0" style={{ width: 80 }}>
             <NumberInput
               label="Weight lbs"
               value={data.weight_lbs}

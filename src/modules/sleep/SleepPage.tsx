@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Plus, Moon } from '@phosphor-icons/react'
+import { Plus, Moon, CaretLeft, CaretRight } from '@phosphor-icons/react'
 import ScreenHeader from '../../ui/ScreenHeader'
 import Toggle from '../../ui/Toggle'
 import Button from '../../ui/Button'
@@ -23,9 +23,23 @@ export default function SleepPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const sleepGoal = useSleepGoal()
 
-  const today      = useMemo(() => new Date(), [])
-  const rangeStart = useMemo(() => addDays(today, isDesktop ? -29 : -6), [today, isDesktop])
-  const rangeEnd   = today
+  const [periodOffset, setPeriodOffset] = useState(0)
+  const periodDays = isDesktop ? 30 : 7
+
+  const today = useMemo(() => new Date(), [])
+  const rangeEnd = useMemo(
+    () => addDays(today, -periodOffset * periodDays),
+    [today, periodOffset, periodDays],
+  )
+  const rangeStart = useMemo(
+    () => addDays(rangeEnd, -(periodDays - 1)),
+    [rangeEnd, periodDays],
+  )
+
+  const periodLabel = useMemo(() => {
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    return `${fmt(rangeStart)} – ${fmt(rangeEnd)}`
+  }, [rangeStart, rangeEnd])
 
   const { data: logs = [], isLoading } = useSleepLogs(rangeStart, rangeEnd)
 
@@ -63,6 +77,48 @@ export default function SleepPage() {
 
       {/* ── Sleep Log section ──────────────────────────────────────────────── */}
       <div className="py-6">
+        {/* Period navigation */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={() => setPeriodOffset((o) => o + 1)}
+            aria-label="Previous period"
+            className="w-8 h-8 flex items-center justify-center rounded-md
+              text-text-secondary hover:text-text-primary hover:bg-bg-hover
+              transition-colors duration-[120ms] ease-out cursor-pointer"
+          >
+            <CaretLeft size={14} weight="bold" aria-hidden="true" />
+          </button>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-text-primary tabular-nums">
+              {periodLabel}
+            </span>
+            {periodOffset > 0 && (
+              <button
+                type="button"
+                onClick={() => setPeriodOffset(0)}
+                className="text-xs text-accent hover:underline cursor-pointer"
+              >
+                Today
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setPeriodOffset((o) => Math.max(0, o - 1))}
+            disabled={periodOffset === 0}
+            aria-label="Next period"
+            className="w-8 h-8 flex items-center justify-center rounded-md
+              text-text-secondary hover:text-text-primary hover:bg-bg-hover
+              transition-colors duration-[120ms] ease-out cursor-pointer
+              disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <CaretRight size={14} weight="bold" aria-hidden="true" />
+          </button>
+        </div>
+
         {/* Chart / Table toggle — right-aligned */}
         <div className="flex justify-end mb-5">
           <Toggle value={view} onChange={setView} options={viewOptions} />
@@ -79,6 +135,7 @@ export default function SleepPage() {
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             goal={sleepGoal}
+            rangeLabel={`${periodDays} DAYS`}
             onBarClick={openEdit}
           />
         ) : (
