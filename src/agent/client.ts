@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { AgentRequest, AgentResult } from './types'
+import type { AgentRequest, AgentResult } from '../types/app'
 
 export async function callAgent<TIn, TOut>(
   req: AgentRequest<TIn>,

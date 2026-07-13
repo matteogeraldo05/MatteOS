@@ -46,23 +46,19 @@ export type WeekPlanData = {
 // ─── Internal: ensure a plan row exists ──────────────────────────────────────
 
 async function ensurePlanId(userId: string, weekStart: string): Promise<string> {
-  const { data: existing } = await supabase
+  // Upsert on the (user_id, week_start_date) unique constraint — atomic, so
+  // rapid concurrent edits can't race a check-then-insert into a violation.
+  const { data, error } = await supabase
     .from('meal_prep_plans')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('week_start_date', weekStart)
-    .maybeSingle()
-
-  if (existing?.id) return existing.id as string
-
-  const { data: newPlan, error } = await supabase
-    .from('meal_prep_plans')
-    .insert({ user_id: userId, week_start_date: weekStart })
+    .upsert(
+      { user_id: userId, week_start_date: weekStart },
+      { onConflict: 'user_id,week_start_date' },
+    )
     .select('id')
     .single()
 
   if (error) throw error
-  return newPlan.id as string
+  return data.id as string
 }
 
 // ─── useWeekPlan ──────────────────────────────────────────────────────────────

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { useAuth } from './AuthProvider'
 import Input from '../ui/Input'
 import Button from '../ui/Button'
 import Spinner from '../ui/Spinner'
@@ -10,7 +9,6 @@ type Mode = 'loading' | 'challenge' | 'enroll'
 
 export default function MFASetupPage() {
   const navigate = useNavigate()
-  const { profile } = useAuth()
 
   const [mode, setMode] = useState<Mode>('loading')
   const [factorId, setFactorId] = useState('')
@@ -57,8 +55,8 @@ export default function MFASetupPage() {
       })
       if (verifyError) throw verifyError
 
-      // Navigate: if profile exists → dashboard, else → onboarding
-      navigate(profile?.display_name ? '/' : '/onboarding', { replace: true })
+      // RequireAuth waits for the profile and routes to /onboarding itself if needed
+      navigate('/', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Verification failed')
     } finally {
