@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { queryClient } from '../lib/queryClient'
@@ -27,50 +27,58 @@ export function useAuth() {
 }
 
 async function fetchProfile(userId: string): Promise<UserProfile | null> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('user_profile')
     .select('*')
     .eq('id', userId)
     .maybeSingle()
-  console.log('[AuthProvider] fetchProfile →', { data, error })
   return data ?? null
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [sessionLoading, setSessionLoading] = useState(true)
+  // The profile is tagged with the user id it was fetched for, so `loading`
+  // stays true for a freshly signed-in user until *their* profile arrives —
+  // otherwise RequireAuth redirects to /onboarding before the fetch settles.
+  const [profileFor, setProfileFor] = useState<{ userId: string; profile: UserProfile | null } | null>(null)
 
-  const handleSession = useCallback(async (newSession: Session | null) => {
-    setSession(newSession)
-    setUser(newSession?.user ?? null)
-    if (newSession?.user) {
-      const p = await fetchProfile(newSession.user.id)
-      setProfile(p)
-    } else {
-      setProfile(null)
-    }
-    setLoading(false)
-  }, [])
+  const user = session?.user ?? null
+  const userId = user?.id ?? null
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
-      handleSession(s)
+      setSession(s)
+      setSessionLoading(false)
     })
 
+    // No awaits inside this callback: supabase-js holds an internal lock while
+    // it runs, and awaiting other supabase calls in here can deadlock.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      handleSession(s)
+      setSession(s)
+      setSessionLoading(false)
     })
 
     return () => subscription.unsubscribe()
-  }, [handleSession])
+  }, [])
+
+  useEffect(() => {
+    if (!userId) return
+    let stale = false
+    fetchProfile(userId).then((p) => {
+      if (!stale) setProfileFor({ userId, profile: p })
+    })
+    return () => { stale = true }
+  }, [userId])
+
+  const profile = userId && profileFor?.userId === userId ? profileFor.profile : null
+  const loading = sessionLoading || (userId !== null && profileFor?.userId !== userId)
 
   const refreshProfile = useCallback(async () => {
-    if (!user) return
-    const p = await fetchProfile(user.id)
-    setProfile(p)
-  }, [user])
+    if (!userId) return
+    const p = await fetchProfile(userId)
+    setProfileFor({ userId, profile: p })
+  }, [userId])
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
@@ -80,12 +88,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .filter((k) => k.startsWith('matteos:'))
       .forEach((k) => localStorage.removeItem(k))
     setSession(null)
-    setUser(null)
-    setProfile(null)
+    setProfileFor(null)
   }, [])
 
+  const value = useMemo(
+    () => ({ session, user, profile, loading, signOut, refreshProfile }),
+    [session, user, profile, loading, signOut, refreshProfile],
+  )
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

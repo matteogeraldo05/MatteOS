@@ -74,11 +74,7 @@ const navItems = [
   },
 ]
 
-interface SidebarProps {
-  currentPath: string
-}
-
-export default function Sidebar({ currentPath: _currentPath }: SidebarProps) {
+export default function Sidebar() {
   const location = useLocation()
   const tabParam = new URLSearchParams(location.search).get('tab')
 
